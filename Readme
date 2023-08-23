@@ -1,0 +1,22 @@
+//get timeline posts
+
+
+router.get("/timeline/:userId", async (req, res) => {
+    try {
+      const currentUser = await User.findById(req.params.userId); // Use req.params.userId
+      const userPosts = await Post.find({ userId: currentUser._id });
+  
+      // Fetch friend posts using $in operator to match multiple user IDs
+      const friendPosts = await Post.find({ userId: { $in: currentUser.followings } });
+  
+      // Combine and sort posts by createdAt date in descending order
+      const allPosts = userPosts.concat(friendPosts);
+      const sortedPosts = allPosts.sort((a, b) => b.createdAt - a.createdAt);
+  
+      res.json(sortedPosts);
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  });
+  
+  module.exports = router;
